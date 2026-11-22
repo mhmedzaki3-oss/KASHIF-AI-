@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102a43">
+<meta name="description" content="كاشف-ايه اى يساعدك على ملاحظة مؤشرات الاحتيال في الرسائل قبل اتخاذ أي إجراء.">
+<title>كاشف-ايه اى | تحقق قبل ما تصدق</title>
+<style>
+:root{color-scheme:light;--navy:#102a43;--blue:#1769aa;--bg:#f3f6f9;--ink:#172b4d;--muted:#62748a;--line:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.65}
+header{background:var(--navy);color:white;padding:24px 18px 28px}.wrap{max-width:760px;margin:auto}.brand{font-size:26px;font-weight:800}.tag{color:#d9eafd;margin-top:4px}
+main{padding:20px 14px 36px}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;margin:0 0 16px;box-shadow:0 3px 14px #102a430b}
+h1{font-size:21px;margin:0 0 8px}h2{font-size:18px;margin:0 0 10px}.hint{color:var(--muted);font-size:14px;margin:0 0 14px}
+textarea{display:block;width:100%;min-height:165px;padding:14px;border:1px solid #9fb3c8;border-radius:12px;font:inherit;font-size:16px;resize:vertical;direction:auto;background:#fff;color:var(--ink)}
+textarea:focus{outline:3px solid #bfdbfe;border-color:var(--blue)}.count{font-size:12px;color:var(--muted);margin:6px 2px 14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer}
+button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}.primary{background:var(--blue);color:white}.secondary{background:#e8eef5;color:var(--navy)}
+.notice{font-size:13px;color:var(--muted);margin-top:14px}#result[hidden]{display:none}.level{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:800;margin-bottom:8px}
+.high{background:#fee2e2;color:#991b1b}.caution{background:#fef3c7;color:#92400e}.low{background:#dcfce7;color:#166534}
+ul{padding-right:22px;margin:8px 0}li{margin:5px 0}.safe{background:#eff6ff;border-right:4px solid #1769aa;padding:12px;border-radius:8px;margin-top:12px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 26px}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">كاشف-ايه اى | KASHIF AI</div><div class="tag">تحقق قبل ما تصدق — TRUST BEFORE YOU ACT</div></div></header>
+<main class="wrap">
+<section class="panel">
+<h1>افحص رسالة مشبوهة</h1>
+<p class="hint">انسخ نص الرسالة والصقه هنا. التحليل في هذه النسخة يتم على جهازك ولا يرسل النص إلى خادم خارجي.</p>
+<label for="message"><strong>نص الرسالة</strong></label>
+<textarea id="message" maxlength="10000" placeholder="الصق الرسالة هنا..." aria-describedby="count privacy"></textarea>
+<div class="count" id="count">0 / 10000</div>
+<div class="actions"><button class="primary" id="analyze" type="button">افحص الرسالة</button><button class="secondary" id="clear" type="button">مسح</button></div>
+<p class="notice" id="privacy">تنبيه: لا تلصق كلمات مرور أو أرقام سرية أو رموز تحقق شخصية.</p>
+</section>
+<section class="panel" id="result" aria-live="polite" hidden>
+<h2>نتيجة الفحص الأولي</h2><div id="level"></div><p id="summary"></p>
+<h2>المؤشرات التي ظهرت</h2><ul id="signals"></ul>
+<div class="safe"><strong>خطوة أمان مقترحة</strong><p id="advice"></p></div>
+<p class="notice">هذه نسخة أولية تعتمد على قواعد نصية بسيطة، وليست حكماً مؤكداً ولا نموذج ذكاء اصطناعي. قد تخطئ أو لا تكتشف بعض أساليب الاحتيال.</p>
+</section>
+<section class="panel"><h2>مهم تعرف</h2><p class="hint" style="margin:0">النتيجة «مؤشرات قليلة» لا تعني أن الرسالة موثوقة. تحقق من الجهة عبر رقم أو تطبيق رسمي تعرفه بنفسك، ولا تضغط الروابط المشبوهة.</p></section>
+</main>
+<footer>نسخة تجريبية أولية — KASHIF AI</footer>
+<script>
+const input=document.getElementById('message'),count=document.getElementById('count'),result=document.getElementById('result');
+input.addEventListener('input',()=>{count.textContent=input.value.length+' / 10000';});
+const rules=[
+{name:'طلب كلمة مرور أو رمز تحقق سري',re:/(كلمة\s*المرور|password|\bpin\b|رمز\s*(التحقق|التأكيد|التفعيل)|\botp\b|رمزك\sالسري)/i,weight:5},
+{name:'طلب تحويل أموال أو دفع عاجل',re:/(حوّل|حول|تحويل|ادفع|سداد|رسوم\sفورية|فودافون\sكاش|انستا\sباي|instapay|wallet)/i,weight:3},
+{name:'استعجال أو تهديد بإيقاف خدمة أو حساب',re:/(فوراً|فورا|حالاً|حالا|خلال\sدقائق|سيتم\sإيقاف|إيقاف\sحسابك|تجميد\sالحساب|آخر\sفرصة|عاجل)/i,weight:3},
+{name:'جائزة أو مكافأة غير متوقعة',re:/(مبروك|تهانينا|جائزة|ربحت|كسبت|هدية|مكافأة|prize|winner)/i,weight:2},
+{name:'وجود رابط يحتاج إلى تحقق',re:/(https?:\/\/|www\.)/i,weight:2},
+{name:'طلب بيانات شخصية أو بنكية',re:/(رقم\sالبطاقة|بيانات\sالبطاقة|cvv|cvc|الرقم\sالقومي|رقم\sالحساب|بياناتك\sالبنكية)/i,weight:4},
+{name:'ادعاء انتحال جهة أو مؤسسة',re:/(البنك المركزي|البنك|خدمة\sالعملاء|الدعم\sالفني|وزارة|الشرطة|الضرائب|شركة\sالشحن)/i,weight:1}
+];
+document.getElementById('analyze').addEventListener('click',()=>{
+const text=input.value.trim();if(!text){input.focus();return;}
+const found=rules.filter(r=>r.re.test(text)),score=found.reduce((n,r)=>n+r.weight,0);
+let level='low',label='مؤشرات قليلة في النص',summary='لم ترصد القواعد الحالية مؤشرات قوية واضحة. هذا لا يثبت أن الرسالة آمنة.';
+if(score>=6){level='high';label='مؤشرات خطورة مرتفعة';summary='ظهرت عدة مؤشرات تستدعي التوقف والتحقق قبل أي تفاعل.';}
+else if(score>=2){level='caution';label='تحتاج إلى الحذر';summary='ظهرت مؤشرات تستحق التحقق من مصدر الرسالة قبل اتخاذ أي إجراء.';}
+document.getElementById('level').innerHTML='<span class="level '+level+'">'+label+'</span>';
+document.getElementById('summary').textContent=summary;
+const list=document.getElementById('signals');list.replaceChildren();
+if(found.length){found.forEach(r=>{const li=document.createElement('li');li.textContent=r.name;list.appendChild(li);});}
+else{const li=document.createElement('li');li.textContent='لم تظهر مؤشرات ضمن القواعد المحدودة الحالية.';list.appendChild(li);}
+document.getElementById('advice').textContent=score>=2?'لا ترسل أموالاً أو بيانات أو رموز تحقق. تواصل مع الجهة من خلال تطبيقها أو رقمها الرسمي الذي تحصل عليه بشكل مستقل.':'لا تضغط أي رابط قبل التحقق. تواصل مع الجهة من قناة رسمية مستقلة إذا كان للرسالة علاقة بحسابك.';
+result.hidden=false;result.scrollIntoView({behavior:'smooth',block:'start'});
+});
+document.getElementById('clear').addEventListener('click',()=>{input.value='';count.textContent='0 / 10000';result.hidden=true;input.focus();});
+</script>
+</body>
+</html>
