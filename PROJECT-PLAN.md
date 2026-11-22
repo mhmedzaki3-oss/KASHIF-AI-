@@ -1,4 +1,3 @@
-Writing
 KASHIF AI — Project Plan
 خطة بناء مشروع كاشف الزيف والنصب
 Version: 0.1
